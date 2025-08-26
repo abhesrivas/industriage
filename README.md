@@ -1,19 +1,18 @@
-# Industriage – Agents for Industrial AI
+<div align="center">
 
-<!-- To put this in the middle, use HTML -->
-<h1 style="text-align:center; font-size:2em; display: flex; justify-content: center; align-items: center;">
-    <span style="margin: 0 1em;">Smarter Workflows.</span><span style="font-size:2em; color:gray;">🐾</span><span style="margin: 0 1em;">Loyal Agents.</span>
+<img src="assets/industriage.png" alt="Industriage Logo" />
+<br>
+<h1 style="text-align:center; font-size:1.5em; display: flex; justify-content: center; align-items: center;">
+    Smarter Workflows. Loyal Agents.
 </h1>
 
-<br>
-
-![Industriage Logo](assets/industriage.png)
+</div>
 
 ## Quick Start
 
 ```bash
 # Install dependencies
-uv sync
+{{ ... }}
 
 # Run workflow evaluation
 bash run_workflow.sh
