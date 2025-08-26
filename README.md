@@ -1,8 +1,13 @@
 # Industriage – Agents for Industrial AI
 
-![Industriage Logo](assets/industriage.png)
+<!-- To put this in the middle, use HTML -->
+<h1 style="text-align:center; font-size:2em; display: flex; justify-content: center; align-items: center;">
+    <span style="margin: 0 1em;">Smarter Workflows.</span><span style="font-size:2em; color:gray;">🐾</span><span style="margin: 0 1em;">Loyal Agents.</span>
+</h1>
 
-### Smarter Workflows. Loyal Agents.
+<br>
+
+![Industriage Logo](assets/industriage.png)
 
 ## Quick Start
 
