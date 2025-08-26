@@ -1,300 +1,137 @@
-# Thunderbird Agentic Workflow System
+# Industriage – Agents for Industrial AI
 
-A flexible, LangGraph-based evaluation framework for industrial maintenance workflows using large language models.
+AI-powered workflow system for processing industrial maintenance voice transcripts into structured work items.
 
-## 🏗️ Architecture
-
-This system provides a modular framework for creating and evaluating agentic workflows:
-
-```
-├── src/
-│   ├── base/                    # Core framework components
-│   │   ├── workflow.py         # Base workflow class
-│   │   ├── graph_builder.py    # LangGraph integration
-│   │   ├── evaluator.py        # Evaluation metrics
-│   │   └── state.py            # State management
-│   └── display.py              # Results presentation
-├── workflows/                   # Workflow implementations
-│   ├── primary/                # Work Item Triaging
-│   │   ├── agents/
-│   │   ├── graph.json
-│   │   ├── state.py
-│   │   ├── workflow.py
-│   │   └── transformations.py
-│   └── secondary/              # Closing Comment
-│       ├── agents/
-│       ├── graph.json
-│       ├── state.py
-│       └── workflow.py
-└── run_workflow.py             # Main execution script
-```
-
-## 🚀 Quick Start
-
-### 1. Installation
+## Quick Start
 
 ```bash
 # Install dependencies
-pip install -e .
+uv sync
 
-# Set up environment variables
-export OPENAI_API_KEY="your-openai-key"
-export ANTHROPIC_API_KEY="your-anthropic-key"
+# Run workflow evaluation
+bash run_workflow.sh
+
+# Test with interactive dashboard
+python test/start_dashboard.py
 ```
 
-### 2. Run Evaluation
+## Architecture
 
-```bash
-# Run primary workflow evaluation
-python run_workflow.py run primary path/to/dataset.json
+### Workflows
+- **Primary**: Voice transcripts → Work requests/orders
+- **Secondary**: Closing comments → Completion records
 
-# Run with specific model and options
-python run_workflow.py run primary dataset.json \
-    --model gpt-4 \
-    --temperature 0.1 \
-    --display-format html \
-    --output results.html \
-    --max-items 10
+Each workflow contains:
+```
+workflows/[name]/
+├── agents/           # Agent JSON configurations
+├── graph.json       # Workflow structure
+├── state.py         # Output schemas
+└── workflow.py      # Implementation
 ```
 
-### 3. Available Commands
+### Agent Structure
 
-```bash
-# List available workflows
-python run_workflow.py list-workflows
-
-# Validate workflow configuration
-python run_workflow.py validate-workflow primary
-
-# Get help
-python run_workflow.py --help
-```
-
-## 📊 Workflows
-
-### Primary: Work Item Triaging
-
-Transforms voice transcriptions from maintenance technicians into structured work items.
-
-**Input**: Plain text voice transcription
-**Output**: Categorized work requests, work orders, and tasks with asset mapping
-
-**Metrics**:
-- Schema Validity: JSON structure compliance
-- Category Classification: Correct routing based on urgency
-- Asset Identification: Accurate asset ID mapping
-
-### Secondary: Closing Comment
-
-Parses maintenance completion notes into structured records.
-
-**Input**: Maintenance closing comments
-**Output**: Work summary with downtime extraction and follow-up assessment
-
-**Metrics**:
-- Schema Validity: JSON structure compliance  
-- Downtime Extraction: Equipment downtime vs work duration accuracy
-- Completeness: All relevant details captured
-
-## 🔧 Creating New Workflows
-
-### 1. Create Workflow Directory
-
-```bash
-mkdir workflows/my_workflow
-mkdir workflows/my_workflow/agents
-```
-
-### 2. Define State Schema
-
-Create `workflows/my_workflow/state.py`:
-
-```python
-from pydantic import BaseModel
-from typing import List
-
-class MyWorkflowOutput(BaseModel):
-    result: str
-    confidence: float
-    items: List[str]
-```
-
-### 3. Implement Workflow Class
-
-Create `workflows/my_workflow/workflow.py`:
-
-```python
-from pathlib import Path
-from typing import Any, Dict, Type
-from src.base import BaseWorkflow, GraphBuilder, EvaluationFramework
-from .state import MyWorkflowOutput
-
-class MyWorkflow(BaseWorkflow):
-    def get_output_schema(self) -> Type[MyWorkflowOutput]:
-        return MyWorkflowOutput
-    
-    def process_input(self, input_text: str) -> Dict[str, Any]:
-        result = self.graph_builder.execute(input_text)
-        return result["output_data"] or {}
-    
-    def evaluate_output(self, input_text: str, actual_output: Dict[str, Any], 
-                       expected_output: Dict[str, Any] = None) -> Dict[str, float]:
-        return self.evaluation_framework.evaluate(input_text, actual_output, expected_output)
-```
-
-### 4. Configure Agent
-
-Create `workflows/my_workflow/agents/my_agent.json`:
-
+Agents are defined in JSON with:
 ```json
 {
-    "name": "my_agent",
-    "description": "Agent description",
-    "prompt": "Your detailed system prompt here..."
+  "name": "agent_name",
+  "description": "Agent description", 
+  "prompt": "System prompt with {{escaped}} JSON examples"
 }
 ```
 
-### 5. Define Graph Structure
+**Key**: Escape curly braces in prompts with `{{}}` for ChatPromptTemplate compatibility.
 
-Create `workflows/my_workflow/graph.json`:
+### Graph Configuration
 
+Simple workflow definition:
 ```json
 {
-    "workflow_name": "my_workflow",
-    "description": "Workflow description",
-    "nodes": [
-        {
-            "id": "process_input",
-            "type": "agent_node", 
-            "agent": "my_agent"
-        }
-    ],
-    "edges": [
-        {"from": "process_input", "to": "END"}
-    ],
-    "entry_point": "process_input"
-}
-```
-
-### 6. Register Workflow
-
-Add to `run_workflow.py`:
-
-```python
-from workflows.my_workflow.workflow import MyWorkflow
-
-def get_workflow_class(workflow_name: str):
-    workflows = {
-        "primary": PrimaryWorkflow,
-        "secondary": SecondaryWorkflow,
-        "my_workflow": MyWorkflow,  # Add here
+  "agents": {
+    "agent_name": {
+      "name": "agent_name",
+      "path": "agents/agent_name.json"
     }
-    # ...
+  },
+  "edges": [
+    ["START", "agent_name"],
+    ["agent_name", "END"]
+  ]
+}
 ```
 
-## 📈 Evaluation Metrics
+## Adding New Workflows
 
-### Built-in Metrics
+1. **Create workflow directory**: `workflows/new_workflow/`
+2. **Define agents**: Add JSON files to `agents/`
+3. **Configure graph**: Create `graph.json` with agents and edges
+4. **Define schema**: Create `state.py` with Pydantic models
+5. **Implement workflow**: Create `workflow.py` extending `BaseWorkflow`
 
-- **SchemaValidityMetric**: Validates JSON structure via Pydantic
-- **CategoryClassificationMetric**: Evaluates categorization accuracy
-- **AssetIdentificationMetric**: Checks asset ID mapping
-- **DowntimeExtractionMetric**: Validates downtime vs work duration
-- **CompletenessMetric**: Ensures all required fields are captured
+## Adding Evaluation Metrics
 
-### Custom Metrics
-
-Create custom metrics by extending `BaseMetric`:
+Create new metrics in `src/base/evaluator.py`:
 
 ```python
-from src.base.evaluator import BaseMetric
-
-class MyCustomMetric(BaseMetric):
+class CustomMetric(BaseMetric):
     @property
     def name(self) -> str:
-        return "my_custom_metric"
+        return "custom_metric_name"
     
     def evaluate(self, input_text: str, actual_output: Dict[str, Any], 
-                expected_output: Dict[str, Any] = None) -> float:
-        # Return score between 0.0 and 1.0
-        return 0.85
+                expected_output: Optional[Dict[str, Any]] = None) -> float:
+        # Return score 0.0-1.0
+        return score
 ```
 
-## 🎨 Results Presentation
+Add to workflow evaluation framework:
+```python
+framework.add_metric(CustomMetric())
+```
 
-### Rich Console Output
+## Voice Testing
+
+### Interactive Dashboard
+```bash
+python test/start_dashboard.py
+# Opens http://localhost:5001
+```
+
+Features:
+- **Voice input**: Click mic button for speech-to-text
+- **Text input**: Manual transcript entry
+- **Model selection**: GPT-4, Claude variants
+- **Real-time results**: JSON output display
+- **History tracking**: Last 10 test results
+
+### Dataset Evaluation
+```bash
+python run_workflow.py primary datasets/primary_dataset.json --model gpt-4o-mini
+```
+
+Outputs saved to `outputs/[workflow]/[timestamp]_[model]/`:
+- `dashboard.html` - Interactive results
+- `results.json` - Raw evaluation data
+- `classification_report.txt` - Text summary
+- `workflow_graph.png` - Visual workflow
+
+## Current Metrics
+
+- **Schema Validity**: Output matches expected Pydantic schema
+- **Category Classification**: Correct work request/order/task categorization  
+- **Asset Identification**: Accurate equipment ID mapping
+- **Downtime Extraction**: Equipment downtime vs work duration
+- **Completeness**: Required fields populated
+
+## Development
 
 ```bash
-python run_workflow.py run primary dataset.json --display-format rich
-```
-
-### HTML Reports
-
-```bash
-python run_workflow.py run primary dataset.json --display-format html --output report.html
-```
-
-### JSON Export
-
-```bash
-python run_workflow.py run primary dataset.json --display-format json --output results.json
-```
-
-## 🔧 Configuration
-
-### Model Configuration
-
-Supported models:
-- OpenAI: `gpt-4`, `gpt-3.5-turbo`
-- Anthropic: `claude-3-sonnet`, `claude-3-haiku`
-
-### Environment Variables
-
-```bash
-# Required for OpenAI models
-export OPENAI_API_KEY="your-key"
-
-# Required for Anthropic models  
-export ANTHROPIC_API_KEY="your-key"
-
-# Optional: Custom base URLs
-export OPENAI_BASE_URL="https://custom-endpoint"
-```
-
-## 📝 Dataset Format
-
-Expected JSON format for datasets:
-
-```json
-[
-    {
-        "input": "Voice transcription text here...",
-        "expected_output": {
-            "work_requests": [...],
-            "work_orders": [...]
-        }
-    }
-]
-```
-
-## 🧪 Testing
-
-```bash
-# Validate all workflows
+# Validate workflow
 python run_workflow.py validate-workflow primary
-python run_workflow.py validate-workflow secondary
 
-# Test with small dataset
-python run_workflow.py run primary test_dataset.json --max-items 5
-```
+# List available workflows  
+python run_workflow.py list-workflows
 
-## 🤝 Contributing
-
-1. Create new workflows in the `workflows/` directory
-2. Follow the established patterns for state, workflow, and agent definitions
-3. Add comprehensive evaluation metrics
-4. Update the workflow registry in `run_workflow.py`
-
-## 📄 License
-
-MIT License - see LICENSE file for details.
+# Debug with breakpoints
+python -m pdb run_workflow.py primary datasets/primary_dataset.json
