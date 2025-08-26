@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Testing Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+        
+        .input-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .input-section h2 {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .workflow-selector {
+            margin-bottom: 20px;
+        }
+        
+        .workflow-selector select, .model-selector select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+        }
+        
+        .input-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+        
+        .mic-button {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .mic-button:hover {
+            background: #c82333;
+            transform: scale(1.1);
+        }
+        
+        .mic-button.recording {
+            background: #28a745;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .text-input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            width: 100%;
+            margin-top: 15px;
+        }
+        
+        .test-button:hover {
+            background: #0056b3;
+        }
+        
+        .test-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .results-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .results-section h2 {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .result-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .result-status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .result-status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .result-status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .result-content {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+            margin-top: 10px;
+        }
+        
+        .json-output {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            margin-top: 10px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .status-indicator {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .status-indicator.listening {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .status-indicator.processing {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .clear-history {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            float: right;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Agent Testing Dashboard</h1>
+            <p>Test and iterate on your maintenance workflow agents in real-time</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <h2>🎯 Test Input</h2>
+                
+                <div class="workflow-selector">
+                    <label for="workflow">Workflow:</label>
+                    <select id="workflow">
+                        <option value="primary">Primary - Work Item Triaging</option>
+                        <option value="secondary">Secondary - Closing Comment</option>
+                    </select>
+                </div>
+                
+                <div class="model-selector">
+                    <label for="model">Model:</label>
+                    <select id="model">
+                        <option value="gpt-4o-mini">GPT-4o Mini</option>
+                        <option value="gpt-4">GPT-4</option>
+                        <option value="claude-3-sonnet">Claude 3 Sonnet</option>
+                        <option value="claude-3-haiku">Claude 3 Haiku</option>
+                    </select>
+                </div>
+                
+                <div class="input-controls">
+                    <button class="mic-button" id="micButton" title="Click to start voice input">
+                        🎤
+                    </button>
+                    <textarea class="text-input" id="textInput" 
+                              placeholder="Type your maintenance request here or use the mic button to speak..."></textarea>
+                </div>
+                
+                <div id="statusIndicator" class="status-indicator" style="display: none;"></div>
+                
+                <button class="test-button" id="testButton">🚀 Test Agent</button>
+                
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Processing your request...</p>
+                </div>
+            </div>
+            
+            <div class="results-section">
+                <h2>📊 Test Results</h2>
+                <button class="clear-history" id="clearHistory">Clear History</button>
+                <div id="results"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class AgentTester {
+            constructor() {
+                this.isRecording = false;
+                this.recognition = null;
+                this.setupEventListeners();
+                this.setupSpeechRecognition();
+                this.loadHistory();
+            }
+            
+            setupEventListeners() {
+                document.getElementById('micButton').addEventListener('click', () => this.toggleRecording());
+                document.getElementById('testButton').addEventListener('click', () => this.testAgent());
+                document.getElementById('clearHistory').addEventListener('click', () => this.clearHistory());
+                
+                // Enter key to test
+                document.getElementById('textInput').addEventListener('keydown', (e) => {
+                    if (e.ctrlKey && e.key === 'Enter') {
+                        this.testAgent();
+                    }
+                });
+            }
+            
+            setupSpeechRecognition() {
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    this.recognition = new SpeechRecognition();
+                    this.recognition.continuous = false;
+                    this.recognition.interimResults = true;
+                    this.recognition.lang = 'en-US';
+                    
+                    this.recognition.onstart = () => {
+                        this.showStatus('Listening... Speak now!', 'listening');
+                    };
+                    
+                    this.recognition.onresult = (event) => {
+                        let transcript = '';
+                        for (let i = event.resultIndex; i < event.results.length; i++) {
+                            transcript += event.results[i][0].transcript;
+                        }
+                        document.getElementById('textInput').value = transcript;
+                    };
+                    
+                    this.recognition.onend = () => {
+                        this.isRecording = false;
+                        this.updateMicButton();
+                        this.hideStatus();
+                    };
+                    
+                    this.recognition.onerror = (event) => {
+                        this.showStatus(`Speech recognition error: ${event.error}`, 'error');
+                        this.isRecording = false;
+                        this.updateMicButton();
+                    };
+                } else {
+                    console.log('Speech recognition not supported');
+                }
+            }
+            
+            toggleRecording() {
+                if (!this.recognition) {
+                    alert('Speech recognition is not supported in your browser');
+                    return;
+                }
+                
+                if (this.isRecording) {
+                    this.recognition.stop();
+                } else {
+                    this.recognition.start();
+                    this.isRecording = true;
+                    this.updateMicButton();
+                }
+            }
+            
+            updateMicButton() {
+                const button = document.getElementById('micButton');
+                if (this.isRecording) {
+                    button.classList.add('recording');
+                    button.title = 'Click to stop recording';
+                } else {
+                    button.classList.remove('recording');
+                    button.title = 'Click to start voice input';
+                }
+            }
+            
+            showStatus(message, type) {
+                const indicator = document.getElementById('statusIndicator');
+                indicator.textContent = message;
+                indicator.className = `status-indicator ${type}`;
+                indicator.style.display = 'block';
+            }
+            
+            hideStatus() {
+                document.getElementById('statusIndicator').style.display = 'none';
+            }
+            
+            async testAgent() {
+                const workflow = document.getElementById('workflow').value;
+                const model = document.getElementById('model').value;
+                const input = document.getElementById('textInput').value.trim();
+                
+                if (!input) {
+                    alert('Please enter some text or use voice input');
+                    return;
+                }
+                
+                // Show loading
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('testButton').disabled = true;
+                this.showStatus('Processing your request...', 'processing');
+                
+                try {
+                    const response = await fetch('/api/test', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            workflow: workflow,
+                            model: model,
+                            input: input
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    this.displayResult(result);
+                    
+                } catch (error) {
+                    this.displayResult({
+                        error: `Network error: ${error.message}`,
+                        success: false,
+                        timestamp: new Date().toISOString(),
+                        workflow: workflow,
+                        model: model,
+                        input: input
+                    });
+                } finally {
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('testButton').disabled = false;
+                    this.hideStatus();
+                }
+            }
+            
+            displayResult(result) {
+                const resultsDiv = document.getElementById('results');
+                const resultElement = document.createElement('div');
+                resultElement.className = 'result-item';
+                
+                const timestamp = new Date(result.timestamp).toLocaleString();
+                const status = result.success ? 'success' : 'error';
+                const statusText = result.success ? '✅ Success' : '❌ Error';
+                
+                resultElement.innerHTML = `
+                    <div class="result-header">
+                        <div>
+                            <strong>${result.workflow}</strong> - ${result.model}
+                            <br><small>${timestamp}</small>
+                        </div>
+                        <div class="result-status ${status}">${statusText}</div>
+                    </div>
+                    <div class="result-content">
+                        <strong>Input:</strong> ${result.input}
+                    </div>
+                    ${result.error ? `
+                        <div class="result-content" style="border-left-color: #dc3545;">
+                            <strong>Error:</strong> ${result.error}
+                        </div>
+                    ` : ''}
+                    ${result.output ? `
+                        <div class="json-output">${JSON.stringify(result.output, null, 2)}</div>
+                    ` : ''}
+                    ${result.processing_time ? `
+                        <div style="margin-top: 10px; font-size: 14px; color: #6c757d;">
+                            Processing time: ${result.processing_time.toFixed(3)}s
+                        </div>
+                    ` : ''}
+                `;
+                
+                resultsDiv.insertBefore(resultElement, resultsDiv.firstChild);
+                
+                // Keep only last 10 results
+                while (resultsDiv.children.length > 10) {
+                    resultsDiv.removeChild(resultsDiv.lastChild);
+                }
+            }
+            
+            async loadHistory() {
+                try {
+                    const response = await fetch('/api/history');
+                    const history = await response.json();
+                    
+                    history.reverse().forEach(result => {
+                        this.displayResult(result);
+                    });
+                } catch (error) {
+                    console.log('Could not load history:', error);
+                }
+            }
+            
+            async clearHistory() {
+                if (confirm('Are you sure you want to clear the test history?')) {
+                    try {
+                        await fetch('/api/clear-history', { method: 'POST' });
+                        document.getElementById('results').innerHTML = '';
+                    } catch (error) {
+                        alert('Error clearing history');
+                    }
+                }
+            }
+        }
+        
+        // Initialize the tester when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new AgentTester();
+        });
+    </script>
+</body>
+</html>

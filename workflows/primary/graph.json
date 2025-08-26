@@ -1,0 +1,12 @@
+{
+  "agents": {
+    "industrial_maintenance_agent": {
+      "name": "industrial_maintenance_agent",
+      "path": "agents/industrial_maintenance_agent.json"
+    }
+  },
+  "edges": [
+    ["START", "industrial_maintenance_agent"],
+    ["industrial_maintenance_agent", "END"]
+  ]
+}

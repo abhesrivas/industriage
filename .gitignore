@@ -5,6 +5,8 @@ build/
 dist/
 wheels/
 *.egg-info
+uv.lock
+
 
 # Virtual environments
 .venv
@@ -14,3 +16,9 @@ wheels/
 
 # Resources
 resources/
+
+.html
+.pdf
+
+outputs/
+examples/

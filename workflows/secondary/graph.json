@@ -1,0 +1,12 @@
+{
+  "agents": {
+    "closing_comment_agent": {
+      "name": "closing_comment_agent",
+      "path": "agents/closing_comment_agent.json"
+    }
+  },
+  "edges": [
+    ["START", "closing_comment_agent"],
+    ["closing_comment_agent", "END"]
+  ]
+}
