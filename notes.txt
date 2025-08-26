@@ -19,3 +19,11 @@ Resources:
 Session 1: 10.32 PM in Windsurf
 --------------------------------
 - Thinking on the project organization, there are two workflows but I should probably come up with a single base framework
+
+11:55 PM
+--------------------------------
+- Initial commit with some errors done
+- Need to check why agents are not returning any output
+- Need to add more eval metrics, can directly compare certain fields like ("personnel") but might need to utilize LLM-based metrics for fields like "Title"
+- LLM as a judge could be an option with manual review for cases that throw off even a single error
+- Dashboard should be interactive and allow for drill-down into the results

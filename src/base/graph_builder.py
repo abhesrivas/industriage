@@ -59,7 +59,7 @@ class GraphBuilder:
                 
                 # Create prompt template
                 prompt = ChatPromptTemplate.from_messages([
-                    ("system", agent["config"]["prompt"]),
+                    ("system", agent["prompt"]),
                     ("human", "{input}")
                 ])
                 
