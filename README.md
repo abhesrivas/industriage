@@ -12,7 +12,7 @@
 
 ```bash
 # Install dependencies
-{{ ... }}
+uv sync
 
 # Run workflow evaluation
 bash run_workflow.sh
