@@ -2,7 +2,7 @@
 
 ![Industriage Logo](assets/industriage.png)
 
-AI-powered workflow system for processing industrial maintenance voice transcripts into structured work items.
+### Smarter Workflows. Loyal Agents.
 
 ## Quick Start
 
