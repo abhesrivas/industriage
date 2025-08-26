@@ -1,0 +1,21 @@
+August 25th, 10.20 PM
+---------------------
+Task(s)
+– Build "Prompt Evaluation Framework" for two workflows
+    - Framework design
+    - Metrics
+    - AI assistance
+
+- Build a dashboard to present the results
+
+Resources:
+- Prompt specifications for two workflows
+    - Primary: Work Item Triaging using Transcribed audio notes
+    - Secondary: Maintenance Work Triaging Workflow
+
+- Dataset
+    - 25 examples x 2 workflows
+
+Session 1: 10.32 PM in Windsurf
+--------------------------------
+- Thinking on the project organization, there are two workflows but I should probably come up with a single base framework
